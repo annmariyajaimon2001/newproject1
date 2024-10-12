@@ -1,44 +1,44 @@
 private readonly EHRMSDbEntities _context;
 
-        public BillingRepo(EHRMSDbEntities context)
+        public InsuranceRepo(EHRMSDbEntities context)
         {
             _context = context;
         }
 
-        public List<Billing> ReadAll()
+        public List<Insurance> ReadAll()
         {
-            return _context.Billings.ToList();
+            return _context.Insurances.ToList();
         }
 
-        public Billing ReadById(int billId)
+        public Insurance ReadById(int insuranceId)
         {
-            return _context.Billings.FirstOrDefault(b => b.BillID == billId);
+            return _context.Insurances.FirstOrDefault(i => i.InsuranceID == insuranceId);
         }
 
-        public void Create(Billing billing)
+        public void Create(Insurance insurance)
         {
-            _context.Billings.Add(billing);
+            _context.Insurances.Add(insurance);
             _context.SaveChanges();
         }
 
-        public void Update(Billing billing)
+        public void Update(Insurance insurance)
         {
-            var existingBilling = _context.Billings.FirstOrDefault(b => b.BillID == billing.BillID);
-            if (existingBilling != null)
+            var existingInsurance = _context.Insurances.FirstOrDefault(i => i.InsuranceID == insurance.InsuranceID);
+            if (existingInsurance != null)
             {
-                existingBilling.TotalAmount = billing.TotalAmount;
-                existingBilling.Status = billing.Status;
-                existingBilling.PaymentMethod = billing.PaymentMethod;
+                existingInsurance.InsuranceProvider = insurance.InsuranceProvider;
+                existingInsurance.PolicyNumber = insurance.PolicyNumber;
+                existingInsurance.ExpirationDate = insurance.ExpirationDate;
                 _context.SaveChanges();
             }
         }
 
-        public void Delete(int billId)
+        public void Delete(int insuranceId)
         {
-            var billing = _context.Billings.FirstOrDefault(b => b.BillID == billId);
-            if (billing != null)
+            var insurance = _context.Insurances.FirstOrDefault(i => i.InsuranceID == insuranceId);
+            if (insurance != null)
             {
-                _context.Billings.Remove(billing);
+                _context.Insurances.Remove(insurance);
                 _context.SaveChanges();
             }
         }
