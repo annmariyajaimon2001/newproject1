@@ -1,66 +1,44 @@
- private ObservableCollection<Insurance> _insuranceRecords;
-        private Insurance _selectedInsurance;
+private readonly EHRMSDbEntities _context;
 
-        public ObservableCollection<Insurance> InsuranceRecords
+        public BillingRepo(EHRMSDbEntities context)
         {
-            get { return _insuranceRecords; }
-            set { _insuranceRecords = value; OnPropertyChanged(nameof(InsuranceRecords)); }
+            _context = context;
         }
 
-        public Insurance SelectedInsurance
+        public List<Billing> ReadAll()
         {
-            get { return _selectedInsurance; }
-            set { _selectedInsurance = value; OnPropertyChanged(nameof(SelectedInsurance)); }
+            return _context.Billings.ToList();
         }
 
-        public ICommand AddInsuranceCommand { get; }
-        public ICommand EditInsuranceCommand { get; }
-        public ICommand DeleteInsuranceCommand { get; }
-
-        public bool IsInsuranceSelected => SelectedInsurance != null;
-
-        public InsuranceViewModel()
+        public Billing ReadById(int billId)
         {
-            // Assuming you have an EF context or other data source
-            InsuranceRecords = new ObservableCollection<Insurance>(/*Load from database*/);
-
-            AddInsuranceCommand = new RelayCommand(AddInsurance);
-            EditInsuranceCommand = new RelayCommand(EditInsurance, () => IsInsuranceSelected);
-            DeleteInsuranceCommand = new RelayCommand(DeleteInsurance, () => IsInsuranceSelected);
+            return _context.Billings.FirstOrDefault(b => b.BillID == billId);
         }
 
-        private void AddInsurance()
+        public void Create(Billing billing)
         {
-            var newInsurance = new Insurance
+            _context.Billings.Add(billing);
+            _context.SaveChanges();
+        }
+
+        public void Update(Billing billing)
+        {
+            var existingBilling = _context.Billings.FirstOrDefault(b => b.BillID == billing.BillID);
+            if (existingBilling != null)
             {
-                // Add new insurance details (mocked here)
-                PatientID = 1, // Replace with actual data
-                InsuranceProvider = "ABC Insurance",
-                PolicyNumber = "XYZ123456",
-                ExpirationDate = DateTime.Now.AddYears(1)
-            };
-
-            // Add to database
-            InsuranceRecords.Add(newInsurance);
-            // Save changes to the database here
-        }
-
-        private void EditInsurance()
-        {
-            if (SelectedInsurance != null)
-            {
-                // Edit insurance logic
-                SelectedInsurance.InsuranceProvider = "XYZ Insurance";
-                // Save changes to the database
+                existingBilling.TotalAmount = billing.TotalAmount;
+                existingBilling.Status = billing.Status;
+                existingBilling.PaymentMethod = billing.PaymentMethod;
+                _context.SaveChanges();
             }
         }
 
-        private void DeleteInsurance()
+        public void Delete(int billId)
         {
-            if (SelectedInsurance != null)
+            var billing = _context.Billings.FirstOrDefault(b => b.BillID == billId);
+            if (billing != null)
             {
-                // Remove from collection
-                InsuranceRecords.Remove(SelectedInsurance);
-                // Delete from the database
+                _context.Billings.Remove(billing);
+                _context.SaveChanges();
             }
         }
