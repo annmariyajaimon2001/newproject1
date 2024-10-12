@@ -1,68 +1,66 @@
-private ObservableCollection<Billing> _billingRecords;
-        private Billing _selectedBill;
+ private ObservableCollection<Insurance> _insuranceRecords;
+        private Insurance _selectedInsurance;
 
-        public ObservableCollection<Billing> BillingRecords
+        public ObservableCollection<Insurance> InsuranceRecords
         {
-            get { return _billingRecords; }
-            set { _billingRecords = value; OnPropertyChanged(nameof(BillingRecords)); }
+            get { return _insuranceRecords; }
+            set { _insuranceRecords = value; OnPropertyChanged(nameof(InsuranceRecords)); }
         }
 
-        public Billing SelectedBill
+        public Insurance SelectedInsurance
         {
-            get { return _selectedBill; }
-            set { _selectedBill = value; OnPropertyChanged(nameof(SelectedBill)); }
+            get { return _selectedInsurance; }
+            set { _selectedInsurance = value; OnPropertyChanged(nameof(SelectedInsurance)); }
         }
 
-        public ICommand AddBillCommand { get; }
-        public ICommand EditBillCommand { get; }
-        public ICommand DeleteBillCommand { get; }
+        public ICommand AddInsuranceCommand { get; }
+        public ICommand EditInsuranceCommand { get; }
+        public ICommand DeleteInsuranceCommand { get; }
 
-        public bool IsBillSelected => SelectedBill != null;
+        public bool IsInsuranceSelected => SelectedInsurance != null;
 
-        public BillingViewModel()
+        public InsuranceViewModel()
         {
-            // Assuming you have an EF context or some other data source
-            BillingRecords = new ObservableCollection<Billing>(/*Load from database*/);
+            // Assuming you have an EF context or other data source
+            InsuranceRecords = new ObservableCollection<Insurance>(/*Load from database*/);
 
-            AddBillCommand = new RelayCommand(AddBill);
-            EditBillCommand = new RelayCommand(EditBill, () => IsBillSelected);
-            DeleteBillCommand = new RelayCommand(DeleteBill, () => IsBillSelected);
+            AddInsuranceCommand = new RelayCommand(AddInsurance);
+            EditInsuranceCommand = new RelayCommand(EditInsurance, () => IsInsuranceSelected);
+            DeleteInsuranceCommand = new RelayCommand(DeleteInsurance, () => IsInsuranceSelected);
         }
 
-        private void AddBill()
+        private void AddInsurance()
         {
-            var newBill = new Billing
+            var newInsurance = new Insurance
             {
-                // Add new bill details (mocked here)
+                // Add new insurance details (mocked here)
                 PatientID = 1, // Replace with actual data
-                TotalAmount = 1000m,
-                Status = "Pending",
-                PaymentMethod = "Credit Card",
-                CreatedAt = DateTime.Now
+                InsuranceProvider = "ABC Insurance",
+                PolicyNumber = "XYZ123456",
+                ExpirationDate = DateTime.Now.AddYears(1)
             };
 
             // Add to database
-            BillingRecords.Add(newBill);
+            InsuranceRecords.Add(newInsurance);
             // Save changes to the database here
         }
 
-        private void EditBill()
+        private void EditInsurance()
         {
-            if (SelectedBill != null)
+            if (SelectedInsurance != null)
             {
-                // Edit bill logic
-                SelectedBill.Status = "Paid";
+                // Edit insurance logic
+                SelectedInsurance.InsuranceProvider = "XYZ Insurance";
                 // Save changes to the database
             }
         }
 
-        private void DeleteBill()
+        private void DeleteInsurance()
         {
-            if (SelectedBill != null)
+            if (SelectedInsurance != null)
             {
                 // Remove from collection
-                BillingRecords.Remove(SelectedBill);
+                InsuranceRecords.Remove(SelectedInsurance);
                 // Delete from the database
             }
         }
-    
