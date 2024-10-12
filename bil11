@@ -1,35 +1,6 @@
 <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-
-        <!-- Billing Section -->
-        <GroupBox Header="Billing Information" Grid.Row="0" Margin="5">
-            <Grid>
-                <DataGrid x:Name="BillingDataGrid" ItemsSource="{Binding BillingRecords}" AutoGenerateColumns="False" 
-                          SelectedItem="{Binding SelectedBill}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="200">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Bill ID" Binding="{Binding BillID}" Width="100"/>
-                        <DataGridTextColumn Header="Patient ID" Binding="{Binding PatientID}" Width="100"/>
-                        <DataGridTextColumn Header="Total Amount" Binding="{Binding TotalAmount, StringFormat=C}" Width="150"/>
-                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="100"/>
-                        <DataGridTextColumn Header="Payment Method" Binding="{Binding PaymentMethod}" Width="150"/>
-                        <DataGridTextColumn Header="Created At" Binding="{Binding CreatedAt, StringFormat=dd/MM/yyyy}" Width="150"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-
-                <!-- Billing Buttons -->
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="10">
-                    <Button Content="Add Bill" Command="{Binding AddBillCommand}" Width="100" Margin="5"/>
-                    <Button Content="Edit Bill" Command="{Binding EditBillCommand}" Width="100" Margin="5" IsEnabled="{Binding IsBillSelected}"/>
-                    <Button Content="Delete Bill" Command="{Binding DeleteBillCommand}" Width="100" Margin="5" IsEnabled="{Binding IsBillSelected}"/>
-                </StackPanel>
-            </Grid>
-        </GroupBox>
-
         <!-- Insurance Section -->
-        <GroupBox Header="Insurance Details" Grid.Row="1" Margin="5">
+        <GroupBox Header="Insurance Details" Margin="5">
             <Grid>
                 <DataGrid x:Name="InsuranceDataGrid" ItemsSource="{Binding InsuranceRecords}" AutoGenerateColumns="False" 
                           SelectedItem="{Binding SelectedInsurance}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="200">
@@ -50,5 +21,4 @@
                 </StackPanel>
             </Grid>
         </GroupBox>
-
     </Grid>
