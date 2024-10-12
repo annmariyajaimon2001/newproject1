@@ -1,523 +1,134 @@
-<Window x:Class="AnnMariya.Pages.MedicationListWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:AnnMariya.Pages"
-        mc:Ignorable="d"
-        Title="MedicationListWindow" Height="450" Width="1000">
-    <Grid Margin="10">
-
-        <!-- DataGrid to display medications -->
-
-        <DataGrid x:Name="grdMedications" ItemsSource="{Binding Medications}" AutoGenerateColumns="False" SelectionMode="Single"
-
-                  SelectedItem="{Binding SelectedMedication, Mode=TwoWay}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="300" Width="850">
-
-            <DataGrid.Columns>
-
-                <DataGridTextColumn Header="ID" Binding="{Binding MedicationID}" Width="50"/>
-
-                <DataGridTextColumn Header="Patient ID" Binding="{Binding PatientID}" Width="80"/>
-
-                <DataGridTextColumn Header="Name" Binding="{Binding MedicationName}" Width="150"/>
-
-                <DataGridTextColumn Header="Dosage" Binding="{Binding Dosage}" Width="90"/>
-
-                <DataGridTextColumn Header="Frequency" Binding="{Binding Frequency}" Width="150"/>
-
-                <DataGridTextColumn Header="Start Date" Binding="{Binding StartDate, StringFormat=dd/MM/yyyy}" Width="100"/>
-
-                <DataGridTextColumn Header="End Date" Binding="{Binding EndDate, StringFormat=dd/MM/yyyy}" Width="100"/>
-
-                <DataGridTextColumn Header="Prescribed By" Binding="{Binding PrescribedBy}" Width="100"/>
-
-            </DataGrid.Columns>
-
-        </DataGrid>
-
-
-
-        <!-- Buttons for Add, Edit, and Delete -->
-
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="10">
-
-            <Button x:Name="btnAdd" Content="Add New"  Width="100" Margin="5" Click="btnAdd_Click"/>
-
-            <Button x:Name="btnEdit" Content="Edit" Click="btnEdit_Click" Width="100" Margin="5" />
-
-            <Button x:Name="btnDelete" Content="Delete" Command="{Binding DeleteCommand}" Width="100" Margin="5" />
-
-        </StackPanel>
-
-    </Grid>
-</Window>
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using AnnMariya.ViewModels;
-
-namespace AnnMariya.Pages
-{
-    /// <summary>
-    /// Interaction logic for MedicationListWindow.xaml
-    /// </summary>
-    public partial class MedicationListWindow : Window
-    {
-        public MedicationListWindow()
-        {
-            InitializeComponent();
-            MedicationViewModel viewModel = new MedicationViewModel();
-            this.DataContext = viewModel;
-        }
-
-        
-
-        private void btnAdd_Click(object sender, RoutedEventArgs e)
-        {
-            FormConfig.newMedicationWindow.Show();
-        }
-
-        private void btnEdit_Click(object sender, RoutedEventArgs e)
-        {
-            FormConfig.editMedicationWindow.Show();
-        }
-    }
-}
-<Window x:Class="AnnMariya.Pages.NewMedicationWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:AnnMariya.Pages"
-        mc:Ignorable="d"
-        Title="NewMedicationWindow" Height="450" Width="800">
-    <Grid Margin="10">
-        <StackPanel Orientation="Vertical">
-            <TextBlock Text="Medication Management" FontSize="20" FontWeight="Bold" Margin="10" HorizontalAlignment="Center"/>
-            <Label Content="Patient ID:"/>
-            <TextBox Text="{Binding NewMedication.PatientID}" Width="200"/>
-            <Label Content="Medication Name:"/>
-            <TextBox Text="{Binding NewMedication.MedicationName}" Width="200"/>
-            <Label Content="Dosage:"/>
-            <TextBox Text="{Binding NewMedication.Dosage}" Width="200"/>
-            <Label Content="Frequency:"/>
-            <TextBox Text="{Binding NewMedication.Frequency}" Width="200"/>
-            <Label Content="Start Date:"/>
-            <DatePicker SelectedDate="{Binding NewMedication.StartDate}" Width="200"/>
-            <Label Content="End Date:"/>
-            <DatePicker SelectedDate="{Binding NewMedication.EndDate}" Width="200"/>
-            <Label Content="Prescribed By:"/>
-            <TextBox Text="{Binding NewMedication.PrescribedBy}" Width="200"/>
-            <Button Content="Save" Command="{Binding CreateCommand}" Width="100" Margin="10"/>
-        </StackPanel>
-    </Grid>
-</Window>
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using AnnMariya.ViewModels;
-
-namespace AnnMariya.Pages
-{
-    /// <summary>
-    /// Interaction logic for NewMedicationWindow.xaml
-    /// </summary>
-    public partial class NewMedicationWindow : Window
-    {
-        public NewMedicationWindow()
-        {
-            InitializeComponent();
-            MedicationViewModel viewModel = new MedicationViewModel();
-            this.DataContext = viewModel;
-
-        }
-    }
-}
-<Window x:Class="AnnMariya.Pages.EditMedicationWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:AnnMariya.Pages"
-        mc:Ignorable="d"
-        Title="EditMedicationWindow" Height="450" Width="800">
-    <Grid Margin="10">
-        <StackPanel Orientation="Vertical">
-            <TextBlock Text="Medication Management" FontSize="20" FontWeight="Bold" Margin="10"/>
-            <Label Content="Patient ID:"/>
-            <TextBox Text="{Binding SelectedMedication.PatientID}" Width="200"/>
-            <Label Content="Medication Name:"/>
-            <TextBox Text="{Binding SelectedMedication.MedicationName}" Width="200"/>
-            <Label Content="Dosage:"/>
-            <TextBox Text="{Binding SelectedMedication.Dosage}" Width="200"/>
-            <Label Content="Frequency:"/>
-            <TextBox Text="{Binding SelectedMedication.Frequency}" Width="200"/>
-            <Label Content="Start Date:"/>
-            <DatePicker SelectedDate="{Binding SelectedMedication.StartDate}" Width="200"/>
-            <Label Content="End Date:"/>
-            <DatePicker SelectedDate="{Binding SelectedMedication.EndDate}" Width="200"/>
-            <Label Content="Prescribed By:"/>
-            <TextBox Text="{Binding SelectedMedication.PrescribedBy}" Width="200"/>
-            <Button Content="Save" Command="{Binding UpdateCommand}" Width="100" Margin="10"/>
-        </StackPanel>
-    </Grid>
-</Window>
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using AnnMariya.ViewModels;
-
-namespace AnnMariya.Pages
-{
-    /// <summary>
-    /// Interaction logic for EditMedicationWindow.xaml
-    /// </summary>
-    public partial class EditMedicationWindow : Window
-    {
-        public EditMedicationWindow()
-        {
-            InitializeComponent();
-            MedicationViewModel viewModel = new MedicationViewModel();
-            this.DataContext = viewModel;
-        }
-    }
-}
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace AnnMariya.Repo
+public class EFMedicationRepo : IMedicationManagementRepo
 {
-    public interface IMedicationManagementRepo
+    private readonly EHRMSDbEntities _context;
+
+    public EFMedicationRepo()
     {
-        void Create(Medication medication);
-        ObservableCollection<Medication> ReadAll();
-        Medication ReadById(int medicationId);
-        void Update(Medication medication);
-        void Delete(Medication medication);
+        _context = new EHRMSDbEntities();
+    }
+
+    public void Create(Medication medication)
+    {
+        _context.Medications.Add(medication);
+        _context.SaveChanges();
+    }
+
+    public ObservableCollection<Medication> ReadAll()
+    {
+        return new ObservableCollection<Medication>(_context.Medications.ToList());
+    }
+
+    public Medication ReadById(int medicationId)
+    {
+        return _context.Medications.FirstOrDefault(m => m.MedicationID == medicationId);
+    }
+
+    public void Update(Medication medication)
+    {
+        var existingMedication = _context.Medications.Find(medication.MedicationID);
+        if (existingMedication != null)
+        {
+            _context.Entry(existingMedication).CurrentValues.SetValues(medication);
+            _context.SaveChanges();
+        }
+    }
+
+    public void Delete(Medication medication)
+    {
+        var medicationToDelete = _context.Medications.Find(medication.MedicationID);
+        if (medicationToDelete != null)
+        {
+            _context.Medications.Remove(medicationToDelete);
+            _context.SaveChanges();
+        }
     }
 }
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AnnMariya.EFRepo
+  public class MedicationViewModel : ViewModelBase
 {
-    public class EFMedicationRepo
-    {
-        
+    private readonly EFMedicationRepo _medicationRepo;
+    private ObservableCollection<Medication> _medications;
+    private Medication _newMedication;
+    private Medication _selectedMedication;
 
+    public ObservableCollection<Medication> Medications
+    {
+        get { return _medications; }
+        set { _medications = value; OnPropertyChanged(nameof(Medications)); }
+    }
+
+    public Medication NewMedication
+    {
+        get { return _newMedication; }
+        set { _newMedication = value; OnPropertyChanged(nameof(NewMedication)); }
+    }
+
+    public Medication SelectedMedication
+    {
+        get { return _selectedMedication; }
+        set { _selectedMedication = value; OnPropertyChanged(nameof(SelectedMedication)); }
+    }
+
+    public ICommand CreateCommand { get; }
+    public ICommand UpdateCommand { get; }
+    public ICommand DeleteCommand { get; }
+
+    public MedicationViewModel()
+    {
+        _medicationRepo = new EFMedicationRepo();
+        Medications = _medicationRepo.ReadAll();
+        CreateCommand = new RelayCommand(Create);
+        UpdateCommand = new RelayCommand(Update);
+        DeleteCommand = new RelayCommand(Delete);
+
+        NewMedication = new Medication
+        {
+            PatientID = 1,
+            MedicationName = "Paracetamol",
+            Dosage = "500mg",
+            Frequency = "Twice a day",
+            StartDate = DateTime.Now,
+            EndDate = DateTime.Now.AddDays(7),
+            PrescribedBy = 1,
+            CreatedAt = DateTime.Now
+        };
+    }
+
+    public void Create()
+    {
+        _medicationRepo.Create(NewMedication);
+        Medications.Add(NewMedication);
+    }
+
+    public void Update()
+    {
+        _medicationRepo.Update(SelectedMedication);
+    }
+
+    public void Delete()
+    {
+        _medicationRepo.Delete(SelectedMedication);
+        Medications.Remove(SelectedMedication);
     }
 }
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
-using System.Windows;
-using AnnMariya.Repo;
-using AnnMariya.Commands;
+   using System.Collections.ObjectModel;
 
-namespace AnnMariya.ViewModels
+public interface IMedicationManagementRepo
 {
-    public delegate void DWindwoClose();
-    public class MedicationViewModel : ViewModelBase
-    {
-        private EHRMSDbEntities _context;
-        private ObservableCollection<Medication> _medications;
-        private Medication _newMedication;
-        private Medication _selectedMedication;
-        public DWindwoClose NewWindowClose;
-        public ObservableCollection<Medication> Medications
-        {
-            get { return _medications; }
-            set { _medications = value; OnPropertyChanged(nameof(Medications)); }
-        }
+    // Create a new medication record
+    void Create(Medication medication);
 
-        public Medication NewMedication
-        {
-            get
-            {
-                return _newMedication;
-            }
+    // Read all medication records
+    ObservableCollection<Medication> ReadAll();
 
-            set
-            {
-                _newMedication = value;
-                OnPropertyChanged(nameof(NewMedication));
-            }
-        }
-        public Medication SelectedMedication
+    // Read a medication record by its ID
+    Medication ReadById(int medicationId);
 
-        {
+    // Update an existing medication record
+    void Update(Medication medication);
 
-            get { return _selectedMedication; }
-
-            set { _selectedMedication = value; OnPropertyChanged(nameof(SelectedMedication)); }
-
-        }
-
-        public ICommand CreateCommand { get; }
-        public ICommand UpdateCommand { get; }
-        public ICommand DeleteCommand { get; }
-
-        public MedicationViewModel()
-        {
-            _context = new EHRMSDbEntities();
-            Medications = new ObservableCollection<Medication>(_context.Patients.ToList());
-            CreateCommand = new RelayCommand(Create);
-            UpdateCommand = new RelayCommand(Update);
-            DeleteCommand = new RelayCommand(Delete);
-
-            NewMedication = new Medication
-            {
-                PatientID = 1,
-                MedicationName = "Paracetamol",
-                Dosage = "500mg",
-                Frequency = "Twice a day",
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddDays(7),
-                PrescibedBy = 1,
-                CreatedAt = DateTime.Now
-            };
-        }
-
-        
-        public ObservableCollection<Medication> ReadAll()
-
-        {
-
-            try
-
-            {
-
-                return new ObservableCollection<Medication>(_context.Medications.ToList());
-
-            }
-
-            catch (Exception ex)
-
-            {
-
-                MessageBox.Show($"Error reading medications: {ex.Message}");
-
-                return new ObservableCollection<Medication>();
-
-            }
-
-        }
-        public Medication ReadById(int medicationId)
-
-        {
-
-            try
-
-            {
-
-                return _context.Medications.FirstOrDefault(m => m.MedicationID == medicationId);
-
-            }
-
-            catch (Exception ex)
-
-            {
-
-                MessageBox.Show($"Error reading medication: {ex.Message}");
-
-                return null;
-
-            }
-
-        }
-        public void Create()
-        {
-
-            var newMedication = new Medication
-            {
-
-                PatientID = NewMedication.PatientID,
-                MedicationName = NewMedication.MedicationName,
-                Dosage = NewMedication.Dosage,
-                Frequency = NewMedication.Frequency,
-                StartDate = NewMedication.StartDate,
-                EndDate = NewMedication.EndDate,
-                PrescibedBy = NewMedication.PrescibedBy,
-                CreatedAt = DateTime.Now
-            };
-
-
-            try
-            {
-                var result = MessageBox.Show(messageBoxText: "Are you sure to create?",
-                        caption: "Confirm",
-                        button: MessageBoxButton.YesNo,
-                        icon: MessageBoxImage.Question);
-                if (result != MessageBoxResult.Yes)
-                {
-                    return;
-                }
-                _context.Patients.Add(newMedication);
-                _context.SaveChanges();
-                Medications.Add(newMedication);
-                result = MessageBox.Show(messageBoxText: "Created Successfully",
-                caption: "Alert",
-                button: MessageBoxButton.OK,
-                icon: MessageBoxImage.Information);
-
-                if (NewWindowClose != null)
-                {
-                    NewWindowClose();
-                }
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"{ex.Message}");
-            }
-
-
-        }
-        public void Update()
-
-        {
-
-            try
-
-            {
-
-                var existingMedication = ReadById(SelectedMedication.MedicationID);
-
-                if (existingMedication == null)
-
-                {
-
-                    MessageBox.Show("Medication not found.");
-
-                    return;
-
-                }
-
-
-
-                existingMedication.MedicationName = SelectedMedication.MedicationName;
-
-                existingMedication.Dosage = SelectedMedication.Dosage;
-
-                existingMedication.Frequency = SelectedMedication.Frequency;
-
-                existingMedication.StartDate = SelectedMedication.StartDate;
-
-                existingMedication.EndDate = SelectedMedication.EndDate;
-
-                existingMedication.PrescribedBy = SelectedMedication.PrescribedBy;
-
-
-
-                _context.SaveChanges();
-
-
-
-                MessageBox.Show("Updated Successfully", "Alert", MessageBoxButton.OK, MessageBoxImage.Information);
-
-            }
-
-            catch (Exception ex)
-
-            {
-
-                MessageBox.Show($"Error updating medication: {ex.Message}");
-
-            }
-
-        }
-        public void Delete()
-
-        {
-
-            try
-
-            {
-
-                var result = MessageBox.Show("Are you sure to delete?", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-                if (result != MessageBoxResult.Yes) return;
-
-
-
-                var medicationToDelete = ReadById(SelectedMedication.MedicationID);
-
-                if (medicationToDelete == null)
-
-                {
-
-                    MessageBox.Show("Medication not found.");
-
-                    return;
-
-                }
-
-
-
-                _context.Medications.Remove(medicationToDelete);
-
-                _context.SaveChanges();
-
-                Medications.Remove(medicationToDelete);
-
-
-
-                MessageBox.Show("Deleted Successfully", "Alert", MessageBoxButton.OK, MessageBoxImage.Information);
-
-            }
-
-            catch (Exception ex)
-
-            {
-
-                MessageBox.Show($"Error deleting medication: {ex.Message}");
-
-            }
-
-        }
-
-    }
+    // Delete a medication record
+    void Delete(Medication medication);
 }
