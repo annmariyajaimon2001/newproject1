@@ -1,44 +1,227 @@
-private readonly EHRMSDbEntities _context;
+<Window x:Class="AnnMariya.Pages.BillingWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AnnMariya.Pages"
+        mc:Ignorable="d"
+        Title="BillingWindow" Height="450" Width="800">
+    <Grid Margin="10">
+        <!-- Billing Section -->
+        <GroupBox Header="Billing Information" Margin="5">
+            <Grid>
+                <DataGrid x:Name="BillingDataGrid" ItemsSource="{Binding BillingRecords}" AutoGenerateColumns="False" 
+                          SelectedItem="{Binding SelectedBill}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="300">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Bill ID" Binding="{Binding BillID}" Width="100"/>
+                        <DataGridTextColumn Header="Patient ID" Binding="{Binding PatientID}" Width="100"/>
+                        <DataGridTextColumn Header="Total Amount" Binding="{Binding TotalAmount, StringFormat=C}" Width="150"/>
+                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="100"/>
+                        <DataGridTextColumn Header="Payment Method" Binding="{Binding PaymentMethod}" Width="150"/>
+                        <DataGridTextColumn Header="Created At" Binding="{Binding CreatedAt, StringFormat=dd/MM/yyyy}" Width="150"/>
+                    </DataGrid.Columns>
+                </DataGrid>
 
-        public InsuranceRepo(EHRMSDbEntities context)
+                <!-- Billing Buttons -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="10">
+                    <Button Content="Add Bill" Command="{Binding AddBillCommand}" Width="100" Margin="5"/>
+                    <Button Content="Edit Bill" Command="{Binding EditBillCommand}" Width="100" Margin="5" IsEnabled="{Binding IsBillSelected}"/>
+                    <Button Content="Delete Bill" Command="{Binding DeleteBillCommand}" Width="100" Margin="5" IsEnabled="{Binding IsBillSelected}"/>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+    </Grid>
+</Window>
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
+using AnnMariya.ViewModels;
+
+namespace AnnMariya.Pages
+{
+    /// <summary>
+    /// Interaction logic for BillingAndInsuranceWindow.xaml
+    /// </summary>
+    public partial class BillingWindow : Window
+    {
+        public BillingWindow()
+        {
+            InitializeComponent();
+            this.DataContext = new BillingViewModel();
+        }
+    }
+}
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Data;
+
+namespace AnnMariya.Repo
+{
+    public interface IBillingRepo
+    {
+        List<Billing> ReadAll();
+        Billing ReadById(int id);
+        void Create(Billing billing);
+        void Update(Billing billing);
+        void Delete(int billId);
+    }
+}
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Data;
+using AnnMariya.Repo;
+
+namespace AnnMariya.EFRepo
+{
+    public class EFBillingRepo : IBillingRepo
+    {
+        private readonly EHRMSDbEntities _context;
+
+        public BillingRepo(EHRMSDbEntities context)
         {
             _context = context;
         }
 
-        public List<Insurance> ReadAll()
+        public List<Billing> ReadAll()
         {
-            return _context.Insurances.ToList();
+            return _context.Billings.ToList();
         }
 
-        public Insurance ReadById(int insuranceId)
+        public Billing ReadById(int billId)
         {
-            return _context.Insurances.FirstOrDefault(i => i.InsuranceID == insuranceId);
+            return _context.Billings.FirstOrDefault(b => b.BillID == billId);
         }
 
-        public void Create(Insurance insurance)
+        public void Create(Billing billing)
         {
-            _context.Insurances.Add(insurance);
+            _context.Billings.Add(billing);
             _context.SaveChanges();
         }
 
-        public void Update(Insurance insurance)
+        public void Update(Billing billing)
         {
-            var existingInsurance = _context.Insurances.FirstOrDefault(i => i.InsuranceID == insurance.InsuranceID);
-            if (existingInsurance != null)
+            var existingBilling = _context.Billings.FirstOrDefault(b => b.BillID == billing.BillID);
+            if (existingBilling != null)
             {
-                existingInsurance.InsuranceProvider = insurance.InsuranceProvider;
-                existingInsurance.PolicyNumber = insurance.PolicyNumber;
-                existingInsurance.ExpirationDate = insurance.ExpirationDate;
+                existingBilling.TotalAmount = billing.TotalAmount;
+                existingBilling.Status = billing.Status;
+                existingBilling.PaymentMethod = billing.PaymentMethod;
                 _context.SaveChanges();
             }
         }
 
-        public void Delete(int insuranceId)
+        public void Delete(int billId)
         {
-            var insurance = _context.Insurances.FirstOrDefault(i => i.InsuranceID == insuranceId);
-            if (insurance != null)
+            var billing = _context.Billings.FirstOrDefault(b => b.BillID == billId);
+            if (billing != null)
             {
-                _context.Insurances.Remove(insurance);
+                _context.Billings.Remove(billing);
                 _context.SaveChanges();
             }
         }
+    }
+}
+
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using AnnMariya.Commands;
+using System.Windows.Data;
+using System.Windows.Input;
+
+namespace AnnMariya.ViewModels
+{
+    public class BillingViewModel : ViewModelBase
+    {
+        private ObservableCollection<Billing> _billingRecords;
+        private Billing _selectedBill;
+
+        public ObservableCollection<Billing> BillingRecords
+        {
+            get { return _billingRecords; }
+            set { _billingRecords = value; OnPropertyChanged(nameof(BillingRecords)); }
+        }
+
+        public Billing SelectedBill
+        {
+            get { return _selectedBill; }
+            set { _selectedBill = value; OnPropertyChanged(nameof(SelectedBill)); }
+        }
+
+        public ICommand AddBillCommand { get; }
+        public ICommand EditBillCommand { get; }
+        public ICommand DeleteBillCommand { get; }
+
+        public bool IsBillSelected => SelectedBill != null;
+
+        public BillingViewModel()
+        {
+            // Assuming you have an EF context or some other data source
+            BillingRecords = new ObservableCollection<Billing>(/*Load from database*/);
+
+            AddBillCommand = new RelayCommand(AddBill);
+            EditBillCommand = new RelayCommand(EditBill, () => IsBillSelected);
+            DeleteBillCommand = new RelayCommand(DeleteBill, () => IsBillSelected);
+        }
+
+        private void AddBill()
+        {
+            var newBill = new Billing
+            {
+                // Add new bill details (mocked here)
+                PatientID = 1, // Replace with actual data
+                TotalAmount = 1000m,
+                Status = "Pending",
+                PaymentMethod = "Credit Card",
+                CreatedAt = DateTime.Now
+            };
+
+            // Add to database
+            BillingRecords.Add(newBill);
+            // Save changes to the database here
+        }
+
+        private void EditBill()
+        {
+            if (SelectedBill != null)
+            {
+                // Edit bill logic
+                SelectedBill.Status = "Paid";
+                // Save changes to the database
+            }
+        }
+
+        private void DeleteBill()
+        {
+            if (SelectedBill != null)
+            {
+                // Remove from collection
+                BillingRecords.Remove(SelectedBill);
+                // Delete from the database
+            }
+        }
+
+    }
+}
