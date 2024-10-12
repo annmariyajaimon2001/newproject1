@@ -1,38 +1,36 @@
-<Window x:Class="AnnMariya.Pages.BillingWindow"
+<Window x:Class="AnnMariya.Pages.InsuranceWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AnnMariya.Pages"
         mc:Ignorable="d"
-        Title="BillingWindow" Height="450" Width="800">
+        Title="InsuranceWindow" Height="450" Width="800">
     <Grid Margin="10">
-        <!-- Billing Section -->
-        <GroupBox Header="Billing Information" Margin="5">
+        <!-- Insurance Section -->
+        <GroupBox Header="Insurance Details" Margin="5">
             <Grid>
-                <DataGrid x:Name="BillingDataGrid" ItemsSource="{Binding BillingRecords}" AutoGenerateColumns="False" 
-                          SelectedItem="{Binding SelectedBill}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="300">
+                <DataGrid x:Name="InsuranceDataGrid" ItemsSource="{Binding InsuranceRecords}" AutoGenerateColumns="False" 
+                          SelectedItem="{Binding SelectedInsurance}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="300">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Bill ID" Binding="{Binding BillID}" Width="100"/>
+                        <DataGridTextColumn Header="Insurance ID" Binding="{Binding InsuranceID}" Width="100"/>
                         <DataGridTextColumn Header="Patient ID" Binding="{Binding PatientID}" Width="100"/>
-                        <DataGridTextColumn Header="Total Amount" Binding="{Binding TotalAmount, StringFormat=C}" Width="150"/>
-                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="100"/>
-                        <DataGridTextColumn Header="Payment Method" Binding="{Binding PaymentMethod}" Width="150"/>
-                        <DataGridTextColumn Header="Created At" Binding="{Binding CreatedAt, StringFormat=dd/MM/yyyy}" Width="150"/>
+                        <DataGridTextColumn Header="Insurance Provider" Binding="{Binding InsuranceProvider}" Width="200"/>
+                        <DataGridTextColumn Header="Policy Number" Binding="{Binding PolicyNumber}" Width="200"/>
+                        <DataGridTextColumn Header="Expiration Date" Binding="{Binding ExpirationDate, StringFormat=dd/MM/yyyy}" Width="150"/>
                     </DataGrid.Columns>
                 </DataGrid>
 
-                <!-- Billing Buttons -->
+                <!-- Insurance Buttons -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="10">
-                    <Button Content="Add Bill" Command="{Binding AddBillCommand}" Width="100" Margin="5"/>
-                    <Button Content="Edit Bill" Command="{Binding EditBillCommand}" Width="100" Margin="5" IsEnabled="{Binding IsBillSelected}"/>
-                    <Button Content="Delete Bill" Command="{Binding DeleteBillCommand}" Width="100" Margin="5" IsEnabled="{Binding IsBillSelected}"/>
+                    <Button Content="Add Insurance" Command="{Binding AddInsuranceCommand}" Width="120" Margin="5"/>
+                    <Button Content="Edit Insurance" Command="{Binding EditInsuranceCommand}" Width="120" Margin="5" IsEnabled="{Binding IsInsuranceSelected}"/>
+                    <Button Content="Delete Insurance" Command="{Binding DeleteInsuranceCommand}" Width="120" Margin="5" IsEnabled="{Binding IsInsuranceSelected}"/>
                 </StackPanel>
             </Grid>
         </GroupBox>
     </Grid>
 </Window>
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,14 +49,14 @@ using AnnMariya.ViewModels;
 namespace AnnMariya.Pages
 {
     /// <summary>
-    /// Interaction logic for BillingAndInsuranceWindow.xaml
+    /// Interaction logic for InsuranceWindow.xaml
     /// </summary>
-    public partial class BillingWindow : Window
+    public partial class InsuranceWindow : Window
     {
-        public BillingWindow()
+        public InsuranceWindow()
         {
             InitializeComponent();
-            this.DataContext = new BillingViewModel();
+            this.DataContext = new InsuranceViewModel();
         }
     }
 }
@@ -72,75 +70,72 @@ using System.Windows.Data;
 
 namespace AnnMariya.Repo
 {
-    public interface IBillingRepo
+    public interface IInsuranceRepo
     {
-        List<Billing> ReadAll();
-        Billing ReadById(int id);
-        void Create(Billing billing);
-        void Update(Billing billing);
-        void Delete(int billId);
+        List<Insurance> ReadAll();
+        Insurance ReadById(int id);
+        void Create(Insurance insurance);
+        void Update(Insurance insurance);
+        void Delete(int insuranceId);
     }
 }
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Data;
 using AnnMariya.Repo;
 
 namespace AnnMariya.EFRepo
 {
-    public class EFBillingRepo : IBillingRepo
+    public class EFInsuranceRepo : IInsuranceRepo
     {
         private readonly EHRMSDbEntities _context;
 
-        public BillingRepo(EHRMSDbEntities context)
+        public InsuranceRepo(EHRMSDbEntities context)
         {
             _context = context;
         }
 
-        public List<Billing> ReadAll()
+        public List<Insurance> ReadAll()
         {
-            return _context.Billings.ToList();
+            return _context.Insurances.ToList();
         }
 
-        public Billing ReadById(int billId)
+        public Insurance ReadById(int insuranceId)
         {
-            return _context.Billings.FirstOrDefault(b => b.BillID == billId);
+            return _context.Insurances.FirstOrDefault(i => i.InsuranceID == insuranceId);
         }
 
-        public void Create(Billing billing)
+        public void Create(Insurance insurance)
         {
-            _context.Billings.Add(billing);
+            _context.Insurances.Add(insurance);
             _context.SaveChanges();
         }
 
-        public void Update(Billing billing)
+        public void Update(Insurance insurance)
         {
-            var existingBilling = _context.Billings.FirstOrDefault(b => b.BillID == billing.BillID);
-            if (existingBilling != null)
+            var existingInsurance = _context.Insurances.FirstOrDefault(i => i.InsuranceID == insurance.InsuranceID);
+            if (existingInsurance != null)
             {
-                existingBilling.TotalAmount = billing.TotalAmount;
-                existingBilling.Status = billing.Status;
-                existingBilling.PaymentMethod = billing.PaymentMethod;
+                existingInsurance.InsuranceProvider = insurance.InsuranceProvider;
+                existingInsurance.PolicyNumber = insurance.PolicyNumber;
+                existingInsurance.ExpirationDate = insurance.ExpirationDate;
                 _context.SaveChanges();
             }
         }
 
-        public void Delete(int billId)
+        public void Delete(int insuranceId)
         {
-            var billing = _context.Billings.FirstOrDefault(b => b.BillID == billId);
-            if (billing != null)
+            var insurance = _context.Insurances.FirstOrDefault(i => i.InsuranceID == insuranceId);
+            if (insurance != null)
             {
-                _context.Billings.Remove(billing);
+                _context.Insurances.Remove(insurance);
                 _context.SaveChanges();
             }
         }
     }
 }
-
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -148,80 +143,77 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AnnMariya.Commands;
-using System.Windows.Data;
 using System.Windows.Input;
 
 namespace AnnMariya.ViewModels
 {
-    public class BillingViewModel : ViewModelBase
+    public class InsuranceViewModel : ViewModelBase
     {
-        private ObservableCollection<Billing> _billingRecords;
-        private Billing _selectedBill;
+        private ObservableCollection<Insurance> _insuranceRecords;
+        private Insurance _selectedInsurance;
 
-        public ObservableCollection<Billing> BillingRecords
+        public ObservableCollection<Insurance> InsuranceRecords
         {
-            get { return _billingRecords; }
-            set { _billingRecords = value; OnPropertyChanged(nameof(BillingRecords)); }
+            get { return _insuranceRecords; }
+            set { _insuranceRecords = value; OnPropertyChanged(nameof(InsuranceRecords)); }
         }
 
-        public Billing SelectedBill
+        public Insurance SelectedInsurance
         {
-            get { return _selectedBill; }
-            set { _selectedBill = value; OnPropertyChanged(nameof(SelectedBill)); }
+            get { return _selectedInsurance; }
+            set { _selectedInsurance = value; OnPropertyChanged(nameof(SelectedInsurance)); }
         }
 
-        public ICommand AddBillCommand { get; }
-        public ICommand EditBillCommand { get; }
-        public ICommand DeleteBillCommand { get; }
+        public ICommand AddInsuranceCommand { get; }
+        public ICommand EditInsuranceCommand { get; }
+        public ICommand DeleteInsuranceCommand { get; }
 
-        public bool IsBillSelected => SelectedBill != null;
+        public bool IsInsuranceSelected => SelectedInsurance != null;
 
-        public BillingViewModel()
+        public InsuranceViewModel()
         {
-            // Assuming you have an EF context or some other data source
-            BillingRecords = new ObservableCollection<Billing>(/*Load from database*/);
+            // Assuming you have an EF context or other data source
+            InsuranceRecords = new ObservableCollection<Insurance>(/*Load from database*/);
 
-            AddBillCommand = new RelayCommand(AddBill);
-            EditBillCommand = new RelayCommand(EditBill, () => IsBillSelected);
-            DeleteBillCommand = new RelayCommand(DeleteBill, () => IsBillSelected);
+            AddInsuranceCommand = new RelayCommand(AddInsurance);
+            EditInsuranceCommand = new RelayCommand(EditInsurance, () => IsInsuranceSelected);
+            DeleteInsuranceCommand = new RelayCommand(DeleteInsurance, () => IsInsuranceSelected);
         }
 
-        private void AddBill()
+        private void AddInsurance()
         {
-            var newBill = new Billing
+            var newInsurance = new Insurance
             {
-                // Add new bill details (mocked here)
+                // Add new insurance details (mocked here)
                 PatientID = 1, // Replace with actual data
-                TotalAmount = 1000m,
-                Status = "Pending",
-                PaymentMethod = "Credit Card",
-                CreatedAt = DateTime.Now
+                InsuranceProvider = "ABC Insurance",
+                PolicyNumber = "XYZ123456",
+                ExpirationDate = DateTime.Now.AddYears(1)
             };
 
             // Add to database
-            BillingRecords.Add(newBill);
+            InsuranceRecords.Add(newInsurance);
             // Save changes to the database here
         }
 
-        private void EditBill()
+        private void EditInsurance()
         {
-            if (SelectedBill != null)
+            if (SelectedInsurance != null)
             {
-                // Edit bill logic
-                SelectedBill.Status = "Paid";
+                // Edit insurance logic
+                SelectedInsurance.InsuranceProvider = "XYZ Insurance";
                 // Save changes to the database
             }
         }
 
-        private void DeleteBill()
+        private void DeleteInsurance()
         {
-            if (SelectedBill != null)
+            if (SelectedInsurance != null)
             {
                 // Remove from collection
-                BillingRecords.Remove(SelectedBill);
+                InsuranceRecords.Remove(SelectedInsurance);
                 // Delete from the database
             }
         }
-
     }
 }
