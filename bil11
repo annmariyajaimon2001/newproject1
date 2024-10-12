@@ -1,24 +1,68 @@
-<Grid Margin="10">
-        <!-- Insurance Section -->
-        <GroupBox Header="Insurance Details" Margin="5">
-            <Grid>
-                <DataGrid x:Name="InsuranceDataGrid" ItemsSource="{Binding InsuranceRecords}" AutoGenerateColumns="False" 
-                          SelectedItem="{Binding SelectedInsurance}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="200">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Insurance ID" Binding="{Binding InsuranceID}" Width="100"/>
-                        <DataGridTextColumn Header="Patient ID" Binding="{Binding PatientID}" Width="100"/>
-                        <DataGridTextColumn Header="Insurance Provider" Binding="{Binding InsuranceProvider}" Width="200"/>
-                        <DataGridTextColumn Header="Policy Number" Binding="{Binding PolicyNumber}" Width="200"/>
-                        <DataGridTextColumn Header="Expiration Date" Binding="{Binding ExpirationDate, StringFormat=dd/MM/yyyy}" Width="150"/>
-                    </DataGrid.Columns>
-                </DataGrid>
+private ObservableCollection<Billing> _billingRecords;
+        private Billing _selectedBill;
 
-                <!-- Insurance Buttons -->
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="10">
-                    <Button Content="Add Insurance" Command="{Binding AddInsuranceCommand}" Width="120" Margin="5"/>
-                    <Button Content="Edit Insurance" Command="{Binding EditInsuranceCommand}" Width="120" Margin="5" IsEnabled="{Binding IsInsuranceSelected}"/>
-                    <Button Content="Delete Insurance" Command="{Binding DeleteInsuranceCommand}" Width="120" Margin="5" IsEnabled="{Binding IsInsuranceSelected}"/>
-                </StackPanel>
-            </Grid>
-        </GroupBox>
-    </Grid>
+        public ObservableCollection<Billing> BillingRecords
+        {
+            get { return _billingRecords; }
+            set { _billingRecords = value; OnPropertyChanged(nameof(BillingRecords)); }
+        }
+
+        public Billing SelectedBill
+        {
+            get { return _selectedBill; }
+            set { _selectedBill = value; OnPropertyChanged(nameof(SelectedBill)); }
+        }
+
+        public ICommand AddBillCommand { get; }
+        public ICommand EditBillCommand { get; }
+        public ICommand DeleteBillCommand { get; }
+
+        public bool IsBillSelected => SelectedBill != null;
+
+        public BillingViewModel()
+        {
+            // Assuming you have an EF context or some other data source
+            BillingRecords = new ObservableCollection<Billing>(/*Load from database*/);
+
+            AddBillCommand = new RelayCommand(AddBill);
+            EditBillCommand = new RelayCommand(EditBill, () => IsBillSelected);
+            DeleteBillCommand = new RelayCommand(DeleteBill, () => IsBillSelected);
+        }
+
+        private void AddBill()
+        {
+            var newBill = new Billing
+            {
+                // Add new bill details (mocked here)
+                PatientID = 1, // Replace with actual data
+                TotalAmount = 1000m,
+                Status = "Pending",
+                PaymentMethod = "Credit Card",
+                CreatedAt = DateTime.Now
+            };
+
+            // Add to database
+            BillingRecords.Add(newBill);
+            // Save changes to the database here
+        }
+
+        private void EditBill()
+        {
+            if (SelectedBill != null)
+            {
+                // Edit bill logic
+                SelectedBill.Status = "Paid";
+                // Save changes to the database
+            }
+        }
+
+        private void DeleteBill()
+        {
+            if (SelectedBill != null)
+            {
+                // Remove from collection
+                BillingRecords.Remove(SelectedBill);
+                // Delete from the database
+            }
+        }
+    
