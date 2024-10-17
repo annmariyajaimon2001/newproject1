@@ -27,3 +27,21 @@ public void Login(User user)
     }
 
 }
+
+
+
+public void HashPassword()
+{
+    string password = NewUser.PasswordHash;
+    using (MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider())
+    {
+        byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
+        byte[] hashBytes = md5.ComputeHash(passwordBytes);
+
+        // Convert the hash bytes to a hexadecimal string
+        string hashString = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+
+        NewUser.PasswordHash = hashString;
+    }
+}
+
