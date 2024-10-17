@@ -1,0 +1,42 @@
+<Grid Background="LightGray">
+    <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
+
+    <TextBlock Text="Help and Support" FontSize="48" FontWeight="Bold" Margin="10" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+
+    <TabControl Grid.Row="1" FontSize="24" FontWeight="Bold">
+        <TabItem Header="FAQs">
+            <StackPanel Margin="10">
+                <TextBlock Text="Frequently Asked Questions" FontSize="36" FontWeight="Bold" Margin="0,0,0,10"/>
+                <TextBlock Text="1. How do I reset my password?" />
+                <TextBlock Text="   - You can reset your password by clicking on 'Forgot Password' on the login page." Margin="0,0,0,10"/>
+                <TextBlock Text="2. How do I contact support?" />
+                <TextBlock Text="   - You can contact support via the 'Contact Us' section." Margin="0,0,0,10"/>
+                <TextBlock Text="3. Where can I find user guides?" />
+                <TextBlock Text="   - User guides are available in the 'Guides' tab." Margin="0,0,0,10"/>
+            </StackPanel>
+        </TabItem>
+
+        <TabItem Header="Guides">
+            <StackPanel Margin="10">
+                <TextBlock Text="User  Guides" FontSize="36" FontWeight="Bold" Margin="0,0,0,10"/>
+                <TextBlock Text="1. Getting Started Guide" Margin="0,0,0,5"/>
+                <TextBlock Text="2. Advanced Features Guide" Margin="0,0,0,5"/>
+                <TextBlock Text="3. Troubleshooting Guide" Margin="0,0,0,5"/>
+                <TextBlock Text="For detailed guides, please visit our website." Margin="0,10,0,0"/>
+            </StackPanel>
+        </TabItem>
+
+        <TabItem Header="Contact Us">
+            <StackPanel Margin="10">
+                <TextBlock Text="Contact Information" FontSize="36" FontWeight="Bold" Margin="0,0,0,10"/>
+                <TextBlock Text="Email: support@medico.com" Margin="0,0,0,5"/>
+                <TextBlock Text="Phone: +91 6534782398" Margin="0,0,0,5"/>
+                <TextBlock Text="Address: 123 Medico St, Suite 100, City, State, ZIP" Margin="0,0,0,5"/>
+                <TextBlock Text="For immediate assistance, please call our support line." Margin="0,10,0,0"/>
+            </StackPanel>
+        </TabItem>
+    </TabControl>
+</Grid>
