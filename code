@@ -1,0 +1,29 @@
+public string GetPassword(string password )
+{
+    using (MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider())
+    {
+        byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
+        byte[] hashBytes = md5.ComputeHash(passwordBytes);
+
+        // Convert the hash bytes to a hexadecimal string
+        string inputHash = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+        return inputHash;
+    }
+
+    
+}
+
+public void Login(User user)
+{
+    var HashedPassword = GetPassword(user.PasswordHash);
+    var User = _context.Users.FirstOrDefault(u => u.Email == user.Email && u.PasswordHash == HashedPassword);
+    if(User == null)
+    {
+        throw new Exception("Invalid username or password");
+    }
+    else
+    {
+        CurrentUser = User;
+    }
+
+}
