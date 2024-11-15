@@ -1,0 +1,277 @@
+// ViewModels/PatientViewModel.cs
+using System;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+
+namespace PatientApp.ViewModels
+{
+    public class PatientViewModel : IPatient, INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+        public event EventHandler<Patient> OnPatientRegistered;
+        public event EventHandler<Patient> OnAppointmentConfirmed;
+
+        // New navigation events
+        public event EventHandler NavigateToAppointment;
+        public event EventHandler NavigateToDashboard;
+
+        public ObservableCollection<Patient> Patients { get; private set; }
+        public ObservableCollection<Patient> ConfirmedPatients { get; private set; }
+
+        private string _registrationMessage;
+        public string RegistrationMessage
+        {
+            get => _registrationMessage;
+            set
+            {
+                _registrationMessage = value;
+                OnPropertyChanged(nameof(RegistrationMessage));
+            }
+        }
+
+        public PatientViewModel()
+        {
+            Patients = new ObservableCollection<Patient>();
+            ConfirmedPatients = new ObservableCollection<Patient>();
+        }
+
+        public void RegisterPatient(Patient patient)
+        {
+            Patients.Add(patient);
+            RegistrationMessage = $"Patient {patient.Name} Registered";
+            OnPatientRegistered?.Invoke(this, patient);
+
+            // Trigger navigation to appointment confirmation
+            NavigateToAppointment?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void ConfirmPatients(Patient patient)
+        {
+            ConfirmedPatients.Add(patient);
+            Patients.Remove(patient);
+            OnAppointmentConfirmed?.Invoke(this, patient);
+
+            // Trigger navigation to dashboard
+            NavigateToDashboard?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+}
+
+
+
+
+
+// MainWindow.xaml.cs
+using System;
+using System.Windows;
+
+namespace PatientApp
+{
+    public partial class MainWindow : Window
+    {
+        private readonly PatientViewModel _patientViewModel;
+
+        public MainWindow()
+        {
+            InitializeComponent();
+            _patientViewModel = new PatientViewModel();
+
+            // Subscribe to events
+            _patientViewModel.OnPatientRegistered += OnPatientRegisteredHandler;
+            _patientViewModel.OnAppointmentConfirmed += OnAppointmentConfirmedHandler;
+            
+            // Subscribe to navigation events
+            _patientViewModel.NavigateToAppointment += NavigateToAppointmentHandler;
+            _patientViewModel.NavigateToDashboard += NavigateToDashboardHandler;
+        }
+
+        private void RegisterPatient_Click(object sender, RoutedEventArgs e)
+        {
+            var registrationViewModel = new PatientRegistrationViewModel(_patientViewModel);
+            MainContent.Content = new PatientRegControl(registrationViewModel);
+        }
+
+        private void ConfirmAppointment_Click(object sender, RoutedEventArgs e)
+        {
+            var confirmationViewModel = new AppointmentConfirmationViewModel(_patientViewModel);
+            MainContent.Content = new AppointmentConfirmationControl(confirmationViewModel);
+        }
+
+        private void ViewDashboard_Click(object sender, RoutedEventArgs e)
+        {
+            var dashboardViewModel = new PatientDashboardViewModel(_patientViewModel);
+            MainContent.Content = new PatientDashboardControl(dashboardViewModel);
+        }
+
+        private void OnPatientRegisteredHandler(object sender, Patient patient)
+        {
+            MessageBox.Show($"Patient Registered: {patient.Name}");
+        }
+
+        private void OnAppointmentConfirmedHandler(object sender, Patient patient)
+        {
+            MessageBox.Show($"Appointment Confirmed for: {patient.Name}");
+        }
+
+        // Navigation event handlers
+        private void NavigateToAppointmentHandler(object sender, EventArgs e)
+        {
+            var confirmationViewModel = new AppointmentConfirmationViewModel(_patientViewModel);
+            MainContent.Content = new AppointmentConfirmationControl(confirmationViewModel);
+        }
+
+        private void NavigateToDashboardHandler(object sender, EventArgs e)
+        {
+            var dashboardViewModel = new PatientDashboardViewModel(_patientViewModel);
+            MainContent.Content = new PatientDashboardControl(dashboardViewModel);
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            _patientViewModel.OnPatientRegistered -= OnPatientRegisteredHandler;
+            _patientViewModel.OnAppointmentConfirmed -= OnAppointmentConfirmedHandler;
+
+            // Unsubscribe from navigation events
+            _patientViewModel.NavigateToAppointment -= NavigateToAppointmentHandler;
+            _patientViewModel.NavigateToDashboard -= NavigateToDashboardHandler;
+        }
+    }
+}
+
+
+
+// ViewModels/PatientRegistrationViewModel.cs
+public class PatientRegistrationViewModel
+{
+    private readonly PatientViewModel _patientViewModel;
+
+    public PatientRegistrationViewModel(PatientViewModel patientViewModel)
+    {
+        _patientViewModel = patientViewModel;
+    }
+
+    public void RegisterPatient(Patient patient)
+    {
+        _patientViewModel.RegisterPatient(patient);
+    }
+}
+
+
+
+
+
+// PatientRegControl.xaml.cs
+using System;
+using System.Windows;
+using System.Windows.Controls;
+
+namespace PatientApp
+{
+    public partial class PatientRegControl : UserControl
+    {
+        private readonly PatientRegistrationViewModel _viewModel;
+
+        public PatientRegControl(PatientRegistrationViewModel viewModel)
+        {
+            InitializeComponent();
+            _viewModel = viewModel;
+        }
+
+        private void btnRegister_Click(object sender, RoutedEventArgs e)
+        {
+            var patient = new Patient
+            {
+                Name = NameTextBox.Text,
+                Age = int.Parse(AgeTextBox.Text),
+                DateOfBirth = DOBPicker.SelectedDate?.ToString("yyyy-MM-dd"),
+                Address = AddressTextBox.Text
+            };
+            _viewModel.RegisterPatient(patient);
+            MessageBox.Show("Patient registered!");
+        }
+    }
+}
+
+
+
+
+
+// ViewModels/AppointmentConfirmationViewModel.cs
+public class AppointmentConfirmationViewModel
+{
+    private readonly PatientViewModel _patientViewModel;
+
+    public AppointmentConfirmationViewModel(PatientViewModel patientViewModel)
+    {
+        _patientViewModel = patientViewModel;
+    }
+
+    public void ConfirmPatient(Patient patient)
+    {
+        _patientViewModel.ConfirmPatients(patient);
+    }
+}
+
+
+
+
+
+// AppointmentConfirmationControl.xaml.cs
+using System.Windows;
+using System.Windows.Controls;
+
+namespace PatientApp
+{
+    public partial class AppointmentConfirmationControl : UserControl
+    {
+        private readonly AppointmentConfirmationViewModel _viewModel;
+
+        public AppointmentConfirmationControl(AppointmentConfirmationViewModel viewModel)
+        {
+            InitializeComponent();
+            _viewModel = viewModel;
+            PatientsListBox.ItemsSource = _viewModel.Patients;
+        }
+
+        private void btnConfirm_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedPatient = (Patient)PatientsListBox.SelectedItem;
+            if (selectedPatient != null)
+            {
+                _viewModel.ConfirmPatient(selectedPatient);
+                MessageBox.Show("Appointment confirmed!");
+            }
+        }
+    }
+}
+
+
+
+
+// ViewModels/PatientDashboardViewModel.cs
+using System.Collections.ObjectModel;
+using PatientApp.Models;
+
+namespace PatientApp.ViewModels
+{
+    public class PatientDashboardViewModel
+    {
+        public ObservableCollection<Patient> ConfirmedPatients { get; }
+
+        public PatientDashboardViewModel(PatientViewModel patientViewModel)
+        {
+            // Expose ConfirmedPatients from the main PatientViewModel
+            ConfirmedPatients = patientViewModel.ConfirmedPatients;
+        }
+    }
+}
+
+
+
+
