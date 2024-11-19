@@ -1,86 +1,85 @@
 using System;
-using System.Collections.ObjectModel;
-using System.Windows;
 using System.Windows.Input;
 
 namespace PatientAdmissionApp
 {
-    public class PatientViewModel : BaseViewModel, IPatient
+    public class PatientViewModel : BaseViewModel
     {
         private MainWindow _mainWindow;
 
-        public event EventHandler AppointmentUpdated;
-        public event EventHandler PatientRegistered;
-        public event EventHandler<PatientModel> PatientUpdated;
-
-        
         public ICommand ShowAppointmentCommand { get; set; }
         public ICommand ShowDashboardCommand { get; set; }
+        public ICommand ShowRegistrationCommand { get; set; }
         public ICommand ExitCommand { get; set; }
 
-        private PatientRegistrationControl registrationControl;
-        private AppointmentControl appointmentControl;
-        private PatientDashboardControl dashboardControl;
-
-        public ObservableCollection<PatientModel> Patients { get; set; } = new ObservableCollection<PatientModel>();
-        public ObservableCollection<PatientModel> ConfirmedPatients { get; set; } = new ObservableCollection<PatientModel>();
-
-        private PatientModel _newPatient;
-        public PatientModel NewPatient
-        {
-            get { return _newPatient; }
-            set { _newPatient = value; OnPropertyChanged(); }
-        }
-
-        private PatientModel _selectedPatient;
-        public PatientModel SelectedPatient
-        {
-            get { return _selectedPatient; }
-            set { _selectedPatient = value; OnPropertyChanged(); }
-        }
-
-        private bool _selectedSlot;
-        public bool SelectedSlot
-        {
-            get { return _selectedSlot; }
-            set { _selectedSlot = value; OnPropertyChanged(nameof(SelectedSlot)); }
-        }
-       
-        public ICommand RegisterPatientCommand { get; set; }
-        public ICommand SendUpdateCommand { get; set; }
+        public RegistrationViewModel RegistrationViewModel { get; private set; }
+        public AppointmentViewModel AppointmentViewModel { get; private set; }
+        public DashboardViewModel DashboardViewModel { get; private set; }
 
         public PatientViewModel(MainWindow mainWindow)
         {
             _mainWindow = mainWindow;
-            NewPatient = new PatientModel();
-            
+
+            // Initialize child view models
+            RegistrationViewModel = new RegistrationViewModel();
+            AppointmentViewModel = new AppointmentViewModel();
+            DashboardViewModel = new DashboardViewModel();
+
+            // Commands for navigation
             ShowAppointmentCommand = new RelayCommand(ShowAppointment);
             ShowDashboardCommand = new RelayCommand(ShowDashboard);
+            ShowRegistrationCommand = new RelayCommand(ShowRegistration);
             ExitCommand = new RelayCommand(Exit);
-
-            // Initialize controls (if needed)
-            registrationControl = new PatientRegistrationControl();
-            appointmentControl = new AppointmentControl();
-            dashboardControl = new PatientDashboardControl();
-
-            RegisterPatientCommand = new RelayCommand(RegisterPatient);
-            SendUpdateCommand = new RelayCommand(SendUpdate);
-
-            PatientUpdated += RegistrationPatientName;
-            PatientUpdated += AppointmentPatientName;
-            PatientUpdated += DashboardPatientName;
-
-            PatientRegistered += OnPatientRegistered;
-            AppointmentUpdated += OnAppointmentUpdated;
-
         }
 
-        public void RegisterPatient(object parameter)
+        private void ShowRegistration(object parameter)
         {
-            PatientRegistered?.Invoke(this, EventArgs.Empty);
+            _mainWindow.MainContent.Content = RegistrationViewModel.RegistrationControl;
         }
 
-        private void OnPatientRegistered(object sender, EventArgs e)
+        private void ShowAppointment(object parameter)
+        {
+            _mainWindow.MainContent.Content = AppointmentViewModel.AppointmentControl;
+        }
+
+        private void ShowDashboard(object parameter)
+        {
+            _mainWindow.MainContent.Content = DashboardViewModel.DashboardControl;
+        }
+
+        private void Exit(object parameter)
+        {
+            Application.Current.Shutdown();
+        }
+    }
+}
+
+
+using System;
+using System.Collections.ObjectModel;
+using System.Windows;
+
+namespace PatientAdmissionApp
+{
+    public class RegistrationViewModel : BaseViewModel
+    {
+        public event EventHandler PatientRegistered;
+
+        public ObservableCollection<PatientModel> Patients { get; set; } = new ObservableCollection<PatientModel>();
+
+        public PatientModel NewPatient { get; set; } = new PatientModel();
+
+        public ICommand RegisterPatientCommand { get; set; }
+
+        public PatientRegistrationControl RegistrationControl { get; private set; }
+
+        public RegistrationViewModel()
+        {
+            RegistrationControl = new PatientRegistrationControl();
+            RegisterPatientCommand = new RelayCommand(RegisterPatient);
+        }
+
+        private void RegisterPatient(object parameter)
         {
             if (!string.IsNullOrEmpty(NewPatient.Name) && NewPatient.Dateofbirth != default)
             {
@@ -93,7 +92,7 @@ namespace PatientAdmissionApp
                     Slot = NewPatient.Slot,
                     BookingDate = NewPatient.BookingDate
                 });
-                PatientUpdated?.Invoke(this, NewPatient);
+                PatientRegistered?.Invoke(this, EventArgs.Empty);
                 NewPatient = new PatientModel();
             }
             else
@@ -101,75 +100,73 @@ namespace PatientAdmissionApp
                 MessageBox.Show("Please provide valid patient details.");
             }
         }
+    }
+}
 
 
-        public void SendUpdate(object parameter)
+
+
+using System;
+using System.Collections.ObjectModel;
+using System.Windows;
+
+namespace PatientAdmissionApp
+{
+    public class AppointmentViewModel : BaseViewModel
+    {
+        public event EventHandler AppointmentUpdated;
+
+        public ObservableCollection<PatientModel> ConfirmedPatients { get; set; } = new ObservableCollection<PatientModel>();
+
+        public PatientModel SelectedPatient { get; set; }
+
+        public ICommand SendUpdateCommand { get; set; }
+
+        public AppointmentControl AppointmentControl { get; private set; }
+
+        public AppointmentViewModel()
+        {
+            AppointmentControl = new AppointmentControl();
+            SendUpdateCommand = new RelayCommand(SendUpdate);
+        }
+
+        private void SendUpdate(object parameter)
         {
             if (SelectedPatient != null)
             {
-                SelectedPatient.ConfirmationStatus = NewPatient.ConfirmationStatus;
-                SelectedPatient.AppointmentDate = NewPatient.AppointmentDate;
+                SelectedPatient.ConfirmationStatus = true; // Example update
+                SelectedPatient.AppointmentDate = DateTime.Now;
                 AppointmentUpdated?.Invoke(this, EventArgs.Empty);
             }
             else
             {
-                MessageBox.Show("Please select a Patient");
-            }
-        }
-
-        private void OnAppointmentUpdated(object sender, EventArgs e)
-        {
-            if (SelectedPatient != null && !ConfirmedPatients.Contains(SelectedPatient))
-            {
-                ConfirmedPatients.Add(SelectedPatient);
-                MessageBox.Show($"Appointment Confirmed for {SelectedPatient.Name}");
-            }
-        }
-
-        // Command method implementations
-        
-
-        private void ShowAppointment(object parameter)
-        {
-            // Logic for showing the Appointment control
-            // Switch MainContent to Appointment control
-            _mainWindow.MainContent.Content = appointmentControl;
-        }
-
-        private void ShowDashboard(object parameter)
-        {
-            // Logic for showing the Dashboard control
-            // Switch MainContent to Dashboard control
-            _mainWindow.MainContent.Content = dashboardControl;
-        }
-
-        private void Exit(object parameter)
-        {
-            // Logic to handle exit (close window, or some other action)
-            Application.Current.Shutdown();
-        }
-
-        public void AppointmentPatientName(object sender, PatientModel e)
-        {
-            if (e != null)
-            {
-                appointmentControl.lblPatientNameLabel.Content = $"  Notified From Registrationpage - {e.Name}";
-            }
-        }
-        public void DashboardPatientName(object sender, PatientModel e)
-        {
-            if (e != null)
-            {
-
-                dashboardControl.lblPatientNameLabel3.Content = $" Notified From Registrationpage - {e.Name}";
-            }
-        }
-        public void RegistrationPatientName(object sender, PatientModel e)
-        {
-            if (e != null)
-            {
-                registrationControl.PatientNameLabel.Content = $"Notification from Registration page - {e.Name}";
+                MessageBox.Show("Please select a Patient.");
             }
         }
     }
 }
+
+
+
+
+namespace PatientAdmissionApp
+{
+    public class DashboardViewModel : BaseViewModel
+    {
+        public DashboardControl DashboardControl { get; private set; }
+
+        public DashboardViewModel()
+        {
+            DashboardControl = new PatientDashboardControl();
+        }
+
+        public void UpdateDashboard(string patientName)
+        {
+            DashboardControl.lblPatientNameLabel3.Content = $"Dashboard Updated: {patientName}";
+        }
+    }
+}
+
+
+
+
